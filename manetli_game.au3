@@ -136,9 +136,9 @@ EndFunc
 	; Coordonée du compteur de ticket Rixe, la couleur = #FFFDD1
 	Local $compteurRixeHaut = PixelGetColor(-368, 267, $hwnd)
 ;~ 	Ca aussi c'est super cool, on prend un screenshot du cadran ticket rixe
-	_ScreenCapture_Capture(@MyDocumentsDir & "\manetli\counterRixe.jpg", -397, 225, -320, 248)
+	_ScreenCapture_Capture(@WorkingDir & "\cache\counterRixe.jpg", -397, 225, -320, 248)
 ;~ 	Puis on lit l'image avec Tesseract et on stock le string dans un fichier .txt
-	$result = _TessOcr(@MyDocumentsDir & "\manetli\counterRixe.jpg", @MyDocumentsDir & "\manetli\counterRixe")
+	$result = _TessOcr(@WorkingDir & "\cache\counterRixe.jpg", @WorkingDir & "\cache\counterRixe")
 	$array = StringSplit($result, @CRLF)
 	Local $counterRixeArr = _StringExplode($array[1], "/", 0)
 	$mousePos = MouseGetPos()
@@ -199,7 +199,11 @@ EndFunc
 ;~ Fonction OCR qui utilise la librairie Tesseract de HP & Google
 Func _TessOcr($in_image, $out_file)
 	Local $Read
-	ShellExecuteWait(@ProgramFilesDir & " (x86)\Tesseract-OCR\tesseract.exe", '"' & $in_image & '" "' & $out_file & '" ' & '"-l eng"'  & '" ' &'" -psm 6"', Null, Null, @SW_HIDE)
+;~ 	Local $iReturn = ShellExecuteWait(@ProgramFilesDir & " (x86)\Tesseract-OCR\tesseract.exe", '"' & $in_image & '" "' & $out_file & '" ' & '"-l eng"'  & '" ' &'" -psm 6"', Null, Null, @SW_HIDE)
+	Local $iReturn = ShellExecuteWait("D:\GitHub\ManetliGame\lib\tesseract-ocr\tesseract.exe", $in_image & " " & $out_file, Null, Null, @SW_HIDE)
+;~ Run(@COMSPEC & "/k " & @ProgramFilesDir & " (x86)\Tesseract-OCR\tesseract.exe " & $in_image & " " & $out_file, @TempDir, @SW_SHOW)
+;~ 	ConsoleWrite("@ProgramFilesDir:" & @ProgramFilesDir & " (x86)\Tesseract-OCR\tesseract.exe" & @CRLF)
+;~ 	ConsoleWrite("param:" & '"' & $in_image & '" "' & $out_file & '" ' & '"-l eng"'  & '" ' &'" -psm 6"' & @CRLF)
 	If @error Then
 		MsgBox(0,"Error","ShellExecuteWait Error")
 		Exit
