@@ -23,10 +23,15 @@
 #Include <String.au3>
 
 ; On chope la fenetre
-$hwnd = WinGetHandle("BlueStacks App Player")
+Global $hwnd = WinGetHandle("BlueStacks App Player")
 
 ; Declare the flags
+Global $mode_test = false
+
 Global $counter = 0
+Global $maximumRixeTicket = 0
+Global $bluestackLeftBarWidth = 59;
+Global $bluestackTopBarHeight = 32;
 Global $sleepTimeAleatoire = 0
 Global $ticketChargement = false
 $Interrupt = 0
@@ -38,7 +43,7 @@ $Tc = 0
 
 Opt("GUIOnEventMode", 1)
 
-$hGUI = GUICreate("Manetli Gaming", 500, 350)
+Global $hGUI = GUICreate("Manetli Gaming", 500, 350)
 $hPic_background = GUICtrlCreatePic(@WorkingDir & "\background.jpg", 0, 0, 0, 0)
 ;; create more controls here
 GUICtrlSetState($hPic_background, $GUI_DISABLE)
@@ -95,7 +100,11 @@ Func RunnerFunc()
 	If $sleepTimeAleatoire = 0 Then
 		$sleepTimeAleatoire = 500
 	Else
-		$sleepTimeAleatoire = Random(4000, 23000, 1)
+		If $mode_test = false Then
+			$sleepTimeAleatoire = Random(4000, 23000, 1)
+		Else
+			$sleepTimeAleatoire = 1000
+		EndIf
 	EndIf
 	sleep($sleepTimeAleatoire)
     ; Check for Interruption
@@ -130,57 +139,70 @@ EndFunc
  Func _startPlaying()
 	 $counter = $counter+1
 	; On déplace la fenetre pour garder toujours les même coordonées
-	WinMove($hwnd, "", -1280, 176, 1235, 694 )
+;~ 	WinMove($hwnd, "", -1280, 176, 1235, 694 )
 	; Ca c'est super cool, on chope la couleur d'un pixel
 	; On indique les coordonées X et Y et la fenetre si besoin
 	; Coordonée du compteur de ticket Rixe, la couleur = #FFFDD1
 	Local $compteurRixeHaut = PixelGetColor(-368, 267, $hwnd)
 ;~ 	Ca aussi c'est super cool, on prend un screenshot du cadran ticket rixe
-	_ScreenCapture_Capture(@WorkingDir & "\cache\counterRixe.jpg", -397, 225, -320, 248)
+;~ 	_ScreenCapture_Capture(@WorkingDir & "\cache\counterRixe.jpg", -397, 225, -320, 248)
+;~ 	_ScreenCapture_Capture(@WorkingDir & "\cache\buttonRixeStart.jpg", -430, 812, -320, 832)
+	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\counterRixe.jpg", $hwnd, 800+$bluestackLeftBarWidth, 20+$bluestackTopBarHeight, 895+$bluestackLeftBarWidth, 42+$bluestackTopBarHeight)
 ;~ 	Puis on lit l'image avec Tesseract et on stock le string dans un fichier .txt
-	$result = _TessOcr(@WorkingDir & "\cache\counterRixe.jpg", @WorkingDir & "\cache\counterRixe")
-	$array = StringSplit($result, @CRLF)
-	Local $counterRixeArr = _StringExplode($array[1], "/", 0)
+	$counterRixe = _TessOcr(@WorkingDir & "\cache\counterRixe.jpg", @WorkingDir & "\cache\counterRixe")
+;~ 	ConsoleWrite("$buttonRixeStart:" & $buttonRixeStart[1] & @CRLF)
+	Local $counterRixeArr = _StringExplode($counterRixe[1], "/", 0)
 	$mousePos = MouseGetPos()
-	$counterRixe = Int($counterRixeArr[0])
-;~ 	If Hex($compteurRixeHaut, 6) = "FFFDD1" And  Hex($compteurRixeBas, 6) = "FFFDD1" And $counterRixe < 1 Then
-	If Hex($compteurRixeHaut, 6) = "FFFDD1" And $counterRixe < 1 Then
+	$maximumRixeTicket = 0
+	If IsArray($counterRixeArr) Then
+		$counterRixeRead = Int($counterRixeArr[0])
+		ConsoleWrite("UBound:" & UBound($counterRixeArr, $UBOUND_ROWS) & @CRLF)
+		If UBound($counterRixeArr, $UBOUND_ROWS) > 1 Then
+			$maximumRixeTicket = Int($counterRixeArr[1])
+		EndIf
+	EndIf
+	ConsoleWrite("$maximumRixeTicket:" & $maximumRixeTicket & @CRLF)
+	ConsoleWrite("$counterRixeRead:" & $counterRixeRead & @CRLF)
+	If $maximumRixeTicket = 10 And $counterRixeRead < 1 Then
+		ConsoleWrite("$ticketChargement:" & $ticketChargement & @CRLF)
 		If $ticketChargement = false Then
-			GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Les tickets du Rixe se rechargent " & $counterRixe & "/10", $idListview)
+			ConsoleWrite("Les tickets du Rixe se rechargent" & @CRLF)
+			GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Les tickets du Rixe se rechargent " & $counterRixeRead & "/10", $idListview)
 			$ticketChargement = true
 		EndIf
 ;~ 		ConsoleWrite("[" & $counter & "] Les tickets du Rixe se rechargent" & @CRLF)
 	Else
 		$ticketChargement = false
 		; On vérifie que le bouton "Lancer une partie" est là
-		; Coordonée du bouton "Commencer Rixe"
-		Local $boutonRixe1 = PixelGetColor(-156, 800, $hwnd) ; Cette zone est juste à droite du bouton, il n'y a pas d'animation
-		; Par sécurité, nous allons vérifier qu'une autre zone correspondant à l'interface du salon de rixe soit bien affichée
-		Local $boutonRixe2 = PixelGetColor(-395, 435, $hwnd) ; position de l'encart noir du rang
-		Local $boutonRixe3 = PixelGetColor(-183, 710, $hwnd) ; position du coffre de la semaine
-		If Hex($boutonRixe1, 6) = "0F0B08" And Hex($boutonRixe2, 6) = "0B090B" And Hex($boutonRixe3, 6) = "8C8C8C" Then
-			ConsoleWrite("$result:" & $result & @CRLF)
-			ConsoleWrite("$counterRixeArr[0]:" & $counterRixeArr[0] & @CRLF)
-			ConsoleWrite("$array[1]:" & $array[1] & @CRLF)
-			GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Le bouton est là, on lance un rixe! " & $counterRixe & "/10", $idListview)
+		_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\buttonRixeStart.jpg", $hwnd, 790+$bluestackLeftBarWidth, 600+$bluestackTopBarHeight, 900+$bluestackLeftBarWidth, 626+$bluestackTopBarHeight)
+		$buttonRixeStart = _TessOcr(@WorkingDir & "\cache\buttonRixeStart.jpg", @WorkingDir & "\cache\buttonRixeStart")
+		If $buttonRixeStart[1] = "Start Brawl" Or $buttonRixeStart[1] = "Sta rt Brawl" Then
+			GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Le bouton est là, on lance un rixe! " & $counterRixeRead & "/10", $idListview)
 			$positionHorizontaleAleatoire = _positionAleatoire(-340, Random(1, 150, 1))
 			$positionVerticaleAleatoire = _positionAleatoire(820, Random(1, 15, 1))
 			; On vérifie que le rixe est ouvert
 			If @HOUR <> "05" Then
-				MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
-				MouseMove($mousePos[0],$mousePos[1],0)
+				If $mode_test = false Then
+					MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+					MouseMove($mousePos[0],$mousePos[1],0)
+				EndIf
 			EndIf
 		Else
 			; Une partie est peut être terminée, nous allons cliquer sur le bouton "Quitter"
-			Local $boutonQuitterRixe1 = PixelGetColor(-239, 835, $hwnd)
-			Local $boutonQuitterRixe2 = PixelGetColor(-198, 830, $hwnd)
-			If Hex($boutonQuitterRixe1, 6) = "C8B478" Or hex($boutonQuitterRixe1, 6) = "422A00" And Hex($boutonQuitterRixe2, 6) = "221500" Then
+			_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\buttonRixeExit.jpg", $hwnd, 953+$bluestackLeftBarWidth, 613+$bluestackTopBarHeight, 997+$bluestackLeftBarWidth, 634+$bluestackTopBarHeight)
+			$buttonRixeExit = _TessOcr(@WorkingDir & "\cache\buttonRixeExit.jpg", @WorkingDir & "\cache\buttonRixeExit")
+			If $buttonRixeExit[1] <> "" Then
+				ConsoleWrite("$buttonRixeExit:" & $buttonRixeExit[1] & @CRLF)
+			EndIf
+			If $buttonRixeExit[1] = "Exit" Then
 				GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Le bouton pour quitter le rixe est là.", $idListview)
 				$positionHorizontaleAleatoire = _positionAleatoire(-243, Random(1, 40, 1))
 				$positionVerticaleAleatoire = _positionAleatoire(831, Random(1, 15, 1))
 ;~ 				ConsoleWrite($positionAleatoire & @CRLF)
-				MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
-				MouseMove($mousePos[0],$mousePos[1],0)
+				If $mode_test = false Then
+					MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+					MouseMove($mousePos[0],$mousePos[1],0)
+				EndIf
 			EndIf
 		EndIf
 	EndIf
@@ -214,5 +236,6 @@ Func _TessOcr($in_image, $out_file)
 	Else
 		$Read = "No file created"
 	EndIf
-	Return $Read
+	$result = StringSplit($Read, @CRLF)
+	Return $result
 EndFunc   ;==>_TessOcr
