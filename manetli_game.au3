@@ -139,7 +139,7 @@ EndFunc
  Func _startPlaying()
 	 $counter = $counter+1
 	; On déplace la fenetre pour garder toujours les même coordonées
-;~ 	WinMove($hwnd, "", -1280, 176, 1235, 694 )
+	WinMove($hwnd, "", -1280, 176, 1235, 694 )
 	; Ca c'est super cool, on chope la couleur d'un pixel
 	; On indique les coordonées X et Y et la fenetre si besoin
 	; Coordonée du compteur de ticket Rixe, la couleur = #FFFDD1
