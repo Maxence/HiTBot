@@ -56,15 +56,15 @@ GUICtrlSetOnEvent($RunBtn, "RunnerFunc")
 $StopBtn = GUICtrlCreateButton("Arrêter", 10, 10, 80, 30)
 GUICtrlSetOnEvent($StopBtn, "StopFunc")
 
-$MaxActions = GUICtrlCreateInput("30000", 260, 15, 70, 20)
-$labelCheck = GUICtrlCreateLabel("Nombre maximum de check :", 120, 18, 150, 15)
+$delayAction = GUICtrlCreateInput("2000", 155, 15, 45, 20) ;delay de 2sec par defaut
+$labelCheck = GUICtrlCreateLabel("Delay(ms) :", 100, 18, 150, 15)
 GUICtrlSetBkColor($labelCheck, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($labelCheck, $COLOR_WHITE)
 
-$labelRixeCounter = GUICtrlCreateLabel("Ticket :", 350, 18, 40, 15)
+$labelRixeCounter = GUICtrlCreateLabel("Ticket :", 420, 18, 40, 15)
 GUICtrlSetBkColor($labelRixeCounter, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($labelRixeCounter, $COLOR_WHITE)
-$inputRixeCounter = GUICtrlCreateLabel("??/10", 390, 18, 40, 15)
+$inputRixeCounter = GUICtrlCreateLabel("??/10", 460, 18, 40, 15)
 GUICtrlSetBkColor($inputRixeCounter, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($inputRixeCounter, $COLOR_WHITE)
 
@@ -100,7 +100,7 @@ Func RunnerFunc()
     GUICtrlSetState($StopBtn, $GUI_SHOW)
   EndIf
 
-  $M = GUICtrlRead($MaxActions)
+  $M = 3000000
 
   $Interrupt = 0
   $EventCheck = 0
@@ -109,7 +109,9 @@ Func RunnerFunc()
 		$sleepTimeAleatoire = 500
 	Else
 		If $mode_test = false Then
-			$sleepTimeAleatoire = Random(4000, 23000, 1)
+			$delay = GUICtrlRead($delayAction)
+			$delayRatio = $delay / 100000
+			$sleepTimeAleatoire = $delayAction + Random(1500*$delayRatio, 6000*$delayRatio, 1)
 		Else
 			$sleepTimeAleatoire = 1000
 		EndIf
