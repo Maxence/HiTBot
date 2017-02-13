@@ -1,7 +1,7 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=hit.ico
 #AutoIt3Wrapper_UseX64=y
-#AutoIt3Wrapper_Res_Fileversion=1.0.0.3
+#AutoIt3Wrapper_Res_Fileversion=1.0.0.4
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1036
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -27,6 +27,10 @@ Global $hwnd = WinGetHandle("BlueStacks App Player")
 ; Declare the flags
 Global $mode_test = false
 
+Global $disconnectMethod = 0
+Global $isDisconnected = false
+Global $rixeRetry = false
+Global $counterRixeRead = 0
 Global $counter = 0
 Global $maximumRixeTicket = 0
 Global $bluestackLeftBarWidth = 59;
@@ -147,32 +151,123 @@ Func ThatExit()
 EndFunc
 
  Func _startPlaying()
-	 $counter = $counter+1
+	$counter = $counter+1
+;~ 	 On check si on est déconnecté
+	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\disconnect.jpg", $hwnd, 330+$bluestackLeftBarWidth, 305+$bluestackTopBarHeight, 687+$bluestackLeftBarWidth, 325+$bluestackTopBarHeight)
+	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\disconnect2.jpg", $hwnd, 483+$bluestackLeftBarWidth, 295+$bluestackTopBarHeight, 682+$bluestackLeftBarWidth, 311+$bluestackTopBarHeight)
+	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\disconnect3.jpg", $hwnd, 452+$bluestackLeftBarWidth, 295+$bluestackTopBarHeight, 714+$bluestackLeftBarWidth, 312+$bluestackTopBarHeight)
+	$disconnectedTxt = _TessOcr(@WorkingDir & "\cache\disconnect.jpg", @WorkingDir & "\cache\disconnect")
+	$disconnectedTxt2 = _TessOcr(@WorkingDir & "\cache\disconnect2.jpg", @WorkingDir & "\cache\disconnect2")
+	$disconnectedTxt3 = _TessOcr(@WorkingDir & "\cache\disconnect3.jpg", @WorkingDir & "\cache\disconnect3")
+;~ 	ConsoleWrite("$disconnectedTxt " & $disconnectedTxt[1] & @CRLF)
+;~ 	ConsoleWrite("$disconnectedTxt2 " & $disconnectedTxt2[1] & @CRLF)
+;~ 	ConsoleWrite("$disconnectedTxt3 " & $disconnectedTxt3[1] & @CRLF)
+	If $disconnectedTxt[1] = "Vou have been disconnected from the server." Then
+		$isDisconnected = true
+		$disconnectMethod = 1
+	ElseIf $disconnectedTxt2[1] = "Network connection lost." Then
+		$isDisconnected = true
+		$disconnectMethod = 2
+	ElseIf $disconnectedTxt3[1] = "Network connection is unstable‘" Then
+		$isDisconnected = true
+		$disconnectMethod = 3
+	Else
+		$isDisconnected = false
+	EndIf
+
+	If $isDisconnected = true Then
+		If $mode_test = false Then
+			$currentWindow = WinGetHandle("")
+			WinActivate($hwnd)
+			$positionHorizontaleAleatoire = _positionAleatoire(584, Random(1, 100, 1)) + $bluestackLeftBarWidth
+			$positionVerticaleAleatoire = _positionAleatoire(417, Random(1, 10, 1)) + $bluestackTopBarHeight
+			$mousePos = MouseGetPos()
+			MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+			ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
+			MouseMove($mousePos[0],$mousePos[1],0)
+			WinActivate($currentWindow)
+		EndIf
+	EndIf
+
+	;~ 	 On check si nous sommes sur la home
+	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\challenge.jpg", $hwnd, 887+$bluestackLeftBarWidth, 624+$bluestackTopBarHeight, 993+$bluestackLeftBarWidth, 647+$bluestackTopBarHeight)
+	$buttonChallenge = _TessOcr(@WorkingDir & "\cache\challenge.jpg", @WorkingDir & "\cache\challenge")
+;~ 	ConsoleWrite("$buttonChallenge " & $buttonChallenge[1] & @CRLF)
+	If $buttonChallenge[1] = "Challenge" Then
+		If $mode_test = false Then
+			$currentWindow = WinGetHandle("")
+			WinActivate($hwnd)
+			$positionHorizontaleAleatoire = _positionAleatoire(939, Random(1, 25, 1)) + $bluestackLeftBarWidth
+			$positionVerticaleAleatoire = _positionAleatoire(558, Random(1, 10, 1)) + $bluestackTopBarHeight
+			$mousePos = MouseGetPos()
+			MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+			ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
+			MouseMove($mousePos[0],$mousePos[1],0)
+			WinActivate($currentWindow)
+		EndIf
+	EndIf
+
+	;~ 	 On check si nous sommes sur la vue Challenge pour cliquer sur Arena
+	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\arena.jpg", $hwnd, 134+$bluestackLeftBarWidth, 578+$bluestackTopBarHeight, 188+$bluestackLeftBarWidth, 593+$bluestackTopBarHeight)
+	$buttonArena = _TessOcr(@WorkingDir & "\cache\arena.jpg", @WorkingDir & "\cache\arena")
+;~ 	ConsoleWrite("$buttonArena " & $buttonArena[1] & @CRLF)
+	If $buttonArena[1] = "Arena" Then
+		If $mode_test = false Then
+			$currentWindow = WinGetHandle("")
+			WinActivate($hwnd)
+			$positionHorizontaleAleatoire = _positionAleatoire(155, Random(1, 25, 1)) + $bluestackLeftBarWidth
+			$positionVerticaleAleatoire = _positionAleatoire(531, Random(1, 10, 1)) + $bluestackTopBarHeight
+			$mousePos = MouseGetPos()
+			MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+			ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
+			MouseMove($mousePos[0],$mousePos[1],0)
+			WinActivate($currentWindow)
+		EndIf
+	EndIf
+
+;~ 	 On check si nous sommes sur la vue Arena pour cliquer sur Brawl
+	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\brawl.jpg", $hwnd, 709+$bluestackLeftBarWidth, 549+$bluestackTopBarHeight, 780+$bluestackLeftBarWidth, 572+$bluestackTopBarHeight)
+	$buttonBrawl = _TessOcr(@WorkingDir & "\cache\brawl.jpg", @WorkingDir & "\cache\brawl")
+;~ 	ConsoleWrite("$buttonBrawl " & $buttonBrawl[1] & @CRLF)
+	If $buttonBrawl[1] = "Enter" Then
+		If $mode_test = false Then
+			$currentWindow = WinGetHandle("")
+			WinActivate($hwnd)
+			$positionHorizontaleAleatoire = _positionAleatoire(742, Random(1, 25, 1)) + $bluestackLeftBarWidth
+			$positionVerticaleAleatoire = _positionAleatoire(562, Random(1, 10, 1)) + $bluestackTopBarHeight
+			$mousePos = MouseGetPos()
+			MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+			ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
+			MouseMove($mousePos[0],$mousePos[1],0)
+			WinActivate($currentWindow)
+		EndIf
+	EndIf
 	; On déplace la fenetre pour garder toujours les même coordonées
 ;~ 	WinMove($hwnd, "", -1280, 176, 1235, 694 )
-	; Ca c'est super cool, on chope la couleur d'un pixel
-	; On indique les coordonées X et Y et la fenetre si besoin
-	; Coordonée du compteur de ticket Rixe, la couleur = #FFFDD1
-	Local $compteurRixeHaut = PixelGetColor(-368, 267, $hwnd)
-;~ 	Ca aussi c'est super cool, on prend un screenshot du cadran ticket rixe
-;~ 	_ScreenCapture_Capture(@WorkingDir & "\cache\counterRixe.jpg", -397, 225, -320, 248)
-;~ 	_ScreenCapture_Capture(@WorkingDir & "\cache\buttonRixeStart.jpg", -430, 812, -320, 832)
 	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\counterRixe.jpg", $hwnd, 800+$bluestackLeftBarWidth, 20+$bluestackTopBarHeight, 895+$bluestackLeftBarWidth, 42+$bluestackTopBarHeight)
 ;~ 	Puis on lit l'image avec Tesseract et on stock le string dans un fichier .txt
 	$counterRixe = _TessOcr(@WorkingDir & "\cache\counterRixe.jpg", @WorkingDir & "\cache\counterRixe")
 ;~ 	ConsoleWrite("$buttonRixeStart:" & $buttonRixeStart[1] & @CRLF)
 	Local $counterRixeArr = _StringExplode($counterRixe[1], "/", 0)
-	$mousePos = MouseGetPos()
 	$maximumRixeTicket = 0
 	If IsArray($counterRixeArr) Then
-		$counterRixeRead = Int($counterRixeArr[0])
-		ConsoleWrite("UBound:" & UBound($counterRixeArr, $UBOUND_ROWS) & @CRLF)
-		If UBound($counterRixeArr, $UBOUND_ROWS) > 1 Then
-			$maximumRixeTicket = Int($counterRixeArr[1])
+		$counterRixeReadCache = Int($counterRixeArr[0])
+		ConsoleWrite("StringLen($counterRixeArr[0]) " & StringLen($counterRixeArr[0]) & @CRLF)
+		ConsoleWrite("$counterRixeArr[0] " & $counterRixeArr[0] & @CRLF)
+		ConsoleWrite("=====$counterRixeRead " & $counterRixeRead & "=====" & @CRLF)
+		ConsoleWrite("$counterRixeReadCache " & $counterRixeReadCache & @CRLF)
+		ConsoleWrite("IsInt($counterRixeReadCache) " & IsInt($counterRixeReadCache) & @CRLF)
+		ConsoleWrite("-----------------------" & @CRLF)
+		If $rixeRetry = false AND IsInt($counterRixeReadCache) = true AND StringLen($counterRixeArr[0]) > 0 AND $counterRixeArr[0] <> " " AND StringInStr($counterRixe[1], "/") > 1 Then
+			$counterRixeRead = Int($counterRixeArr[0])
+;~ 			ConsoleWrite("UBound:" & UBound($counterRixeArr, $UBOUND_ROWS) & @CRLF)
+			If UBound($counterRixeArr, $UBOUND_ROWS) > 1 Then
+				$maximumRixeTicket = Int($counterRixeArr[1])
+			EndIf
 		EndIf
 	EndIf
-	ConsoleWrite("$maximumRixeTicket:" & $maximumRixeTicket & @CRLF)
-	ConsoleWrite("$counterRixeRead:" & $counterRixeRead & @CRLF)
+;~ 	ConsoleWrite("$maximumRixeTicket:" & $maximumRixeTicket & @CRLF)
+;~ 	ConsoleWrite("$counterRixeRead:" & $counterRixeRead & @CRLF)
 	If $maximumRixeTicket = 10 And $counterRixeRead < 1 Then
 		ConsoleWrite("$ticketChargement:" & $ticketChargement & @CRLF)
 		If $ticketChargement = false Then
@@ -197,8 +292,10 @@ EndFunc
 				If $mode_test = false Then
 					$currentWindow = WinGetHandle("")
 					WinActivate($hwnd)
+					$mousePos = MouseGetPos()
 					MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
 					GUICtrlSetData($inputRixeCounter, $counterRixeRead -1 & "/10")
+					$counterRixeRead = $counterRixeRead - 1
 					ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
 					MouseMove($mousePos[0],$mousePos[1],0)
 					WinActivate($currentWindow)
@@ -208,18 +305,32 @@ EndFunc
 			; Une partie est peut être terminée, nous allons cliquer sur le bouton "Quitter"
 			_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\buttonRixeExit.jpg", $hwnd, 953+$bluestackLeftBarWidth, 613+$bluestackTopBarHeight, 997+$bluestackLeftBarWidth, 634+$bluestackTopBarHeight)
 			$buttonRixeExit = _TessOcr(@WorkingDir & "\cache\buttonRixeExit.jpg", @WorkingDir & "\cache\buttonRixeExit")
-			If $buttonRixeExit[1] <> "" Then
+			If $buttonRixeExit[1] <> " " Then
 				ConsoleWrite("$buttonRixeExit:" & $buttonRixeExit[1] & @CRLF)
 			EndIf
 			If $buttonRixeExit[1] = "Exit" Then
 				GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Le bouton pour quitter le rixe est là.", $idListview)
-				$positionHorizontaleAleatoire = _positionAleatoire(975, Random(1, 20, 1)) + $bluestackLeftBarWidth
-				$positionVerticaleAleatoire = _positionAleatoire(625, Random(1, 10, 1)) + $bluestackTopBarHeight
 ;~ 				ConsoleWrite($positionAleatoire & @CRLF)
 				If $mode_test = false Then
 					$currentWindow = WinGetHandle("")
 					WinActivate($hwnd)
-					MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+;~ 					Si il nous reste des tickets alors on retry
+					If $counterRixeRead >= Random(2, 4, 1) Then
+						$positionHorizontaleAleatoire = _positionAleatoire(1105, Random(1, 20, 1)) + $bluestackLeftBarWidth
+						$positionVerticaleAleatoire = _positionAleatoire(625, Random(1, 10, 1)) + $bluestackTopBarHeight
+						$mousePos = MouseGetPos()
+						MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+						$counterRixeRead = $counterRixeRead - 1
+						$rixeRetry = true
+						GUICtrlSetData($inputRixeCounter, $counterRixeRead & "/10")
+					Else
+;~ 						Sinon on click sur exit
+						$positionHorizontaleAleatoire = _positionAleatoire(975, Random(1, 20, 1)) + $bluestackLeftBarWidth
+						$positionVerticaleAleatoire = _positionAleatoire(625, Random(1, 10, 1)) + $bluestackTopBarHeight
+						$mousePos = MouseGetPos()
+						MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+						$rixeRetry = false
+					EndIf
 					ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
 					MouseMove($mousePos[0],$mousePos[1],0)
 					WinActivate($currentWindow)
