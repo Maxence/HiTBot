@@ -1,16 +1,15 @@
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=hit.ico
+#AutoIt3Wrapper_UseX64=y
+#AutoIt3Wrapper_Res_Fileversion=1.0.0.3
+#AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
+#AutoIt3Wrapper_Res_Language=1036
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 ;~ Assistance au farming sur le jeu HIT
 ;~ Le bot est capable de lire le nombre de ticket rixe et de lancer une partir si il reste des tickets et de quitter la partie pour vérifier à nouveau
 ;~
 ;~ A venir
 ;~ Si plus de ticket rixe, on lance quelques parties de farming
-
-
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
-#AutoIt3Wrapper_Icon=hit.ico
-#AutoIt3Wrapper_UseX64=y
-#AutoIt3Wrapper_Res_Fileversion=1.0
-#AutoIt3Wrapper_Res_Language=1036
-#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #include <Date.au3>
 #include <ColorConstants.au3>
 #include <GUIConstantsEx.au3>
@@ -45,7 +44,7 @@ $Tc = 0
 Opt("MouseCoordMode", 2)
 Opt("GUIOnEventMode", 1)
 
-Global $hGUI = GUICreate("Manetli Gaming", 500, 350)
+Global $hGUI = GUICreate("Manetli Gaming", 500, 250)
 $hPic_background = GUICtrlCreatePic(@WorkingDir & "\background.jpg", 0, 0, 0, 0)
 ;; create more controls here
 GUICtrlSetState($hPic_background, $GUI_DISABLE)
@@ -57,14 +56,21 @@ GUICtrlSetOnEvent($RunBtn, "RunnerFunc")
 $StopBtn = GUICtrlCreateButton("Arrêter", 10, 10, 80, 30)
 GUICtrlSetOnEvent($StopBtn, "StopFunc")
 
-$MaxActions = GUICtrlCreateInput("30000", 270, 15, 70, 20)
-$labelCheck = GUICtrlCreateLabel("Nombre maximum de check :", 120, 18, 150, 50)
+$MaxActions = GUICtrlCreateInput("30000", 260, 15, 70, 20)
+$labelCheck = GUICtrlCreateLabel("Nombre maximum de check :", 120, 18, 150, 15)
 GUICtrlSetBkColor($labelCheck, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($labelCheck, $COLOR_WHITE)
 
+$labelRixeCounter = GUICtrlCreateLabel("Ticket :", 350, 18, 40, 15)
+GUICtrlSetBkColor($labelRixeCounter, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($labelRixeCounter, $COLOR_WHITE)
+$inputRixeCounter = GUICtrlCreateLabel("??/10", 390, 18, 40, 15)
+GUICtrlSetBkColor($inputRixeCounter, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($inputRixeCounter, $COLOR_WHITE)
+
 ;~ Global $idMylist = GUICtrlCreateList("", 10, 50, 480, 300)
 ;~ GUICtrlSetLimit(-1, 200) ; to limit horizontal scrolling
-Global $idListview = GUICtrlCreateListView("Heure|Nbr|Message", 10, 50, 480, 290) ;,$LVS_SORTDESCENDING)
+Global $idListview = GUICtrlCreateListView("Heure|Nbr|Message", 10, 50, 480, 190) ;,$LVS_SORTDESCENDING)
 _GUICtrlListView_SetColumnWidth($idListview,0,55)
 _GUICtrlListView_SetColumnWidth($idListview,1,40)
 _GUICtrlListView_SetColumnWidth($idListview,2,381)
@@ -142,7 +148,6 @@ EndFunc
 	 $counter = $counter+1
 	; On déplace la fenetre pour garder toujours les même coordonées
 ;~ 	WinMove($hwnd, "", -1280, 176, 1235, 694 )
-	WinActivate($hwnd)
 	; Ca c'est super cool, on chope la couleur d'un pixel
 	; On indique les coordonées X et Y et la fenetre si besoin
 	; Coordonée du compteur de ticket Rixe, la couleur = #FFFDD1
@@ -170,6 +175,7 @@ EndFunc
 		ConsoleWrite("$ticketChargement:" & $ticketChargement & @CRLF)
 		If $ticketChargement = false Then
 			ConsoleWrite("Les tickets du Rixe se rechargent" & @CRLF)
+			GUICtrlSetData($inputRixeCounter,$counterRixeRead & "/10")
 			GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Les tickets du Rixe se rechargent " & $counterRixeRead & "/10", $idListview)
 			$ticketChargement = true
 		EndIf
@@ -181,14 +187,19 @@ EndFunc
 		$buttonRixeStart = _TessOcr(@WorkingDir & "\cache\buttonRixeStart.jpg", @WorkingDir & "\cache\buttonRixeStart")
 		If $buttonRixeStart[1] = "Start Brawl" Or $buttonRixeStart[1] = "Sta rt Brawl" Then
 			GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Le bouton est là, on lance un rixe! " & $counterRixeRead & "/10", $idListview)
+			_GUICtrlListView_Scroll($idListview, 0, (_GUICtrlListView_GetItemCount($idListview) -1) * 14)
 			$positionHorizontaleAleatoire = _positionAleatoire(865, Random(1, 100, 1)) + $bluestackLeftBarWidth
 			$positionVerticaleAleatoire = _positionAleatoire(615, Random(1, 10, 1)) + $bluestackTopBarHeight
 			; On vérifie que le rixe est ouvert
 			If @HOUR <> "05" Then
 				If $mode_test = false Then
+					$currentWindow = WinGetHandle("")
+					WinActivate($hwnd)
 					MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+					GUICtrlSetData($inputRixeCounter, $counterRixeRead -1 & "/10")
 					ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
-;~ 					MouseMove($mousePos[0],$mousePos[1],0)
+					MouseMove($mousePos[0],$mousePos[1],0)
+					WinActivate($currentWindow)
 				EndIf
 			EndIf
 		Else
@@ -204,9 +215,12 @@ EndFunc
 				$positionVerticaleAleatoire = _positionAleatoire(625, Random(1, 10, 1)) + $bluestackTopBarHeight
 ;~ 				ConsoleWrite($positionAleatoire & @CRLF)
 				If $mode_test = false Then
-					MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1)
+					$currentWindow = WinGetHandle("")
+					WinActivate($hwnd)
+					MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
 					ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
-;~ 					MouseMove($mousePos[0],$mousePos[1],0)
+					MouseMove($mousePos[0],$mousePos[1],0)
+					WinActivate($currentWindow)
 				EndIf
 			EndIf
 		EndIf
