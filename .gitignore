@@ -45,6 +45,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+cache/*
 cache/counterRixe.jpg
 cache/counterRixe.txt
 cache/buttonRixeStart.jpg
