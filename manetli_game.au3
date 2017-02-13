@@ -41,6 +41,8 @@ $EventCheck = 0
 ; Allows the script to carry on from where it stopped
 $Tc = 0
 
+;~ Cett option permet d'avoir les coordonées de l'app bluestack et non des dualscreen
+Opt("MouseCoordMode", 2)
 Opt("GUIOnEventMode", 1)
 
 Global $hGUI = GUICreate("Manetli Gaming", 500, 350)
@@ -139,7 +141,8 @@ EndFunc
  Func _startPlaying()
 	 $counter = $counter+1
 	; On déplace la fenetre pour garder toujours les même coordonées
-	WinMove($hwnd, "", -1280, 176, 1235, 694 )
+;~ 	WinMove($hwnd, "", -1280, 176, 1235, 694 )
+	WinActivate($hwnd)
 	; Ca c'est super cool, on chope la couleur d'un pixel
 	; On indique les coordonées X et Y et la fenetre si besoin
 	; Coordonée du compteur de ticket Rixe, la couleur = #FFFDD1
@@ -178,13 +181,14 @@ EndFunc
 		$buttonRixeStart = _TessOcr(@WorkingDir & "\cache\buttonRixeStart.jpg", @WorkingDir & "\cache\buttonRixeStart")
 		If $buttonRixeStart[1] = "Start Brawl" Or $buttonRixeStart[1] = "Sta rt Brawl" Then
 			GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Le bouton est là, on lance un rixe! " & $counterRixeRead & "/10", $idListview)
-			$positionHorizontaleAleatoire = _positionAleatoire(-340, Random(1, 150, 1))
-			$positionVerticaleAleatoire = _positionAleatoire(820, Random(1, 15, 1))
+			$positionHorizontaleAleatoire = _positionAleatoire(865, Random(1, 100, 1)) + $bluestackLeftBarWidth
+			$positionVerticaleAleatoire = _positionAleatoire(615, Random(1, 10, 1)) + $bluestackTopBarHeight
 			; On vérifie que le rixe est ouvert
 			If @HOUR <> "05" Then
 				If $mode_test = false Then
 					MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
-					MouseMove($mousePos[0],$mousePos[1],0)
+					ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
+;~ 					MouseMove($mousePos[0],$mousePos[1],0)
 				EndIf
 			EndIf
 		Else
@@ -196,12 +200,13 @@ EndFunc
 			EndIf
 			If $buttonRixeExit[1] = "Exit" Then
 				GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Le bouton pour quitter le rixe est là.", $idListview)
-				$positionHorizontaleAleatoire = _positionAleatoire(-243, Random(1, 40, 1))
-				$positionVerticaleAleatoire = _positionAleatoire(831, Random(1, 15, 1))
+				$positionHorizontaleAleatoire = _positionAleatoire(975, Random(1, 20, 1)) + $bluestackLeftBarWidth
+				$positionVerticaleAleatoire = _positionAleatoire(625, Random(1, 10, 1)) + $bluestackTopBarHeight
 ;~ 				ConsoleWrite($positionAleatoire & @CRLF)
 				If $mode_test = false Then
-					MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
-					MouseMove($mousePos[0],$mousePos[1],0)
+					MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1)
+					ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
+;~ 					MouseMove($mousePos[0],$mousePos[1],0)
 				EndIf
 			EndIf
 		EndIf
