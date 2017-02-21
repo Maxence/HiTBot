@@ -1,7 +1,7 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=hit.ico
 #AutoIt3Wrapper_UseX64=y
-#AutoIt3Wrapper_Res_Fileversion=1.0.0.4
+#AutoIt3Wrapper_Res_Fileversion=1.0.0.10
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1036
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -27,17 +27,7 @@ Global $hwnd = WinGetHandle("BlueStacks App Player")
 ; Declare the flags
 Global $mode_test = false
 
-Global $disconnectMethod = 0
-Global $isDisconnected = false
-Global $rixeRetry = false
-Global $counterRixeRead = 0
-Global $counter = 0
-Global $maximumRixeTicket = 0
-Global $bluestackLeftBarWidth = 59;
-Global $bluestackTopBarHeight = 32;
-Global $sleepTimeAleatoire = 0
-Global $ticketChargement = false
-$Interrupt = 0
+Global $Interrupt = 0
 $EventCheck = 0
 
 ; Todays actions
@@ -60,10 +50,10 @@ GUICtrlSetOnEvent($RunBtn, "RunnerFunc")
 $StopBtn = GUICtrlCreateButton("Arrêter", 10, 10, 80, 30)
 GUICtrlSetOnEvent($StopBtn, "StopFunc")
 
-$delayAction = GUICtrlCreateInput("2000", 155, 15, 45, 20) ;delay de 2sec par defaut
-$labelCheck = GUICtrlCreateLabel("Delay(ms) :", 100, 18, 150, 15)
-GUICtrlSetBkColor($labelCheck, $GUI_BKCOLOR_TRANSPARENT )
-GUICtrlSetColor($labelCheck, $COLOR_WHITE)
+$gemmeGame = GUICtrlCreateInput("0", 175, 15, 45, 20) ;delay de 2sec par defaut
+$labelGemmeGame = GUICtrlCreateLabel("GemmeGame :", 100, 18, 150, 15)
+GUICtrlSetBkColor($labelGemmeGame, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($labelGemmeGame, $COLOR_WHITE)
 
 $labelRixeCounter = GUICtrlCreateLabel("Ticket :", 420, 18, 40, 15)
 GUICtrlSetBkColor($labelRixeCounter, $GUI_BKCOLOR_TRANSPARENT )
@@ -71,6 +61,18 @@ GUICtrlSetColor($labelRixeCounter, $COLOR_WHITE)
 $inputRixeCounter = GUICtrlCreateLabel("??/10", 460, 18, 40, 15)
 GUICtrlSetBkColor($inputRixeCounter, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($inputRixeCounter, $COLOR_WHITE)
+
+Global $disconnectMethod = 0
+Global $isDisconnected = false
+Global $rixeRetry = false
+Global $counterRixeRead = 0
+Global $counter = 0
+Global $maximumRixeTicket = 0
+Global $bluestackLeftBarWidth = 59;
+Global $bluestackTopBarHeight = 32;
+Global $sleepTimeAleatoire = 0
+Global $ticketChargement = false
+Global $rixeGemmeLaunch = GUICtrlRead($gemmeGame)
 
 ;~ Global $idMylist = GUICtrlCreateList("", 10, 50, 480, 300)
 ;~ GUICtrlSetLimit(-1, 200) ; to limit horizontal scrolling
@@ -93,7 +95,8 @@ While 1
     ; This temporary return to the main loop, allows AutoIt to quickly handle system events
     ; such as GUI_EVENT_CLOSE. If we reached this far, then its safe to assume that
     ; there was no system events, and we can return to the RunnerFunc.
-    RunnerFunc()
+;~ 	$Interrupt = 0
+;~     RunnerFunc()
   EndIf
 WEnd
 
@@ -104,18 +107,23 @@ Func RunnerFunc()
     GUICtrlSetState($StopBtn, $GUI_SHOW)
   EndIf
 
+  $rixeGemmeLaunch = GUICtrlRead($gemmeGame)
+
   $M = 3000000
 
   $Interrupt = 0
+  ConsoleWrite("Not while RunnerFunc() $Interrupt " & $Interrupt & @CRLF)
   $EventCheck = 0
   For $i = $Tc To $M
+	ConsoleWrite("RunnerFunc() $Interrupt " & $Interrupt & @CRLF)
 	If $sleepTimeAleatoire = 0 Then
 		$sleepTimeAleatoire = 500
 	Else
 		If $mode_test = false Then
-			$delay = GUICtrlRead($delayAction)
-			$delayRatio = $delay / 100000
-			$sleepTimeAleatoire = $delayAction + Random(1500*$delayRatio, 6000*$delayRatio, 1)
+;~ 			$delay = GUICtrlRead($delayAction)
+;~ 			$delayRatio = $delay / 100000
+;~ 			$sleepTimeAleatoire = $delayAction + Random(1500*$delayRatio, 16000*$delayRatio, 1)
+			$sleepTimeAleatoire = Random(2000, 10000, 1)
 		Else
 			$sleepTimeAleatoire = 1000
 		EndIf
@@ -130,6 +138,7 @@ Func RunnerFunc()
     $Tc = $i+1
     ; Return to allow checking for system events
     $EventCheck = 1
+	RunnerFunc()
     Return
   Next
   ConsoleWrite(">Waiting for next run" & @CRLF)
@@ -137,13 +146,17 @@ Func RunnerFunc()
 EndFunc
 
 Func StopFunc()
+  $Interrupt = 1
+  ConsoleWrite("StopFunc() $Interrupt " & $Interrupt & @CRLF)
   GUICtrlSetState($StopBtn, $GUI_HIDE)
   GUICtrlSetState($RunBtn, $GUI_SHOW)
   ConsoleWrite(">Stopped" & @CRLF)
 EndFunc
 
 Func _WM_COMMAND($hWnd, $Msg, $wParam, $lParam)
-  If BitAND($wParam, 0x0000FFFF) =  $StopBtn Then $Interrupt = 1
+	If BitAND($wParam, 0x0000FFFF) =  $StopBtn Then
+	  $Interrupt = 1
+	EndIf
   Return $GUI_RUNDEFMSG
 EndFunc
 Func ThatExit()
@@ -168,7 +181,7 @@ EndFunc
 	ElseIf $disconnectedTxt2[1] = "Network connection lost." Then
 		$isDisconnected = true
 		$disconnectMethod = 2
-	ElseIf $disconnectedTxt3[1] = "Network connection is unstable‘" Then
+	ElseIf $disconnectedTxt3[1] = "Network connection is unstable‘" OR $disconnectedTxt3[1] = "Network connection is unstable" Then
 		$isDisconnected = true
 		$disconnectMethod = 3
 	Else
@@ -242,6 +255,27 @@ EndFunc
 			WinActivate($currentWindow)
 		EndIf
 	EndIf
+
+;~ 	 On check si nous pouvons gemmer
+	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\brawlGemme.jpg", $hwnd, 443+$bluestackLeftBarWidth, 210+$bluestackTopBarHeight, 718+$bluestackLeftBarWidth, 232+$bluestackTopBarHeight)
+	$buttonBrawlGemme = _TessOcr(@WorkingDir & "\cache\brawlGemme.jpg", @WorkingDir & "\cache\brawlGemme")
+;~ 	ConsoleWrite("$buttonBrawlGemme " & $buttonBrawlGemme[1] & @CRLF)
+	If $buttonBrawlGemme[1] = "Recharge Brawl Points." Then
+		If $mode_test = false Then
+			$currentWindow = WinGetHandle("")
+			WinActivate($hwnd)
+			$positionHorizontaleAleatoire = _positionAleatoire(586, Random(1, 25, 1)) + $bluestackLeftBarWidth
+			$positionVerticaleAleatoire = _positionAleatoire(416, Random(1, 10, 1)) + $bluestackTopBarHeight
+			$mousePos = MouseGetPos()
+			MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+			ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
+			MouseMove($mousePos[0],$mousePos[1],0)
+			WinActivate($currentWindow)
+			$rixeGemmeLaunch = $rixeGemmeLaunch +1
+			GUICtrlSetData($gemmeGame,$rixeGemmeLaunch)
+		EndIf
+	EndIf
+
 	; On déplace la fenetre pour garder toujours les même coordonées
 ;~ 	WinMove($hwnd, "", -1280, 176, 1235, 694 )
 	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\counterRixe.jpg", $hwnd, 800+$bluestackLeftBarWidth, 20+$bluestackTopBarHeight, 895+$bluestackLeftBarWidth, 42+$bluestackTopBarHeight)
@@ -252,12 +286,12 @@ EndFunc
 	$maximumRixeTicket = 0
 	If IsArray($counterRixeArr) Then
 		$counterRixeReadCache = Int($counterRixeArr[0])
-		ConsoleWrite("StringLen($counterRixeArr[0]) " & StringLen($counterRixeArr[0]) & @CRLF)
-		ConsoleWrite("$counterRixeArr[0] " & $counterRixeArr[0] & @CRLF)
-		ConsoleWrite("=====$counterRixeRead " & $counterRixeRead & "=====" & @CRLF)
-		ConsoleWrite("$counterRixeReadCache " & $counterRixeReadCache & @CRLF)
-		ConsoleWrite("IsInt($counterRixeReadCache) " & IsInt($counterRixeReadCache) & @CRLF)
-		ConsoleWrite("-----------------------" & @CRLF)
+;~ 		ConsoleWrite("StringLen($counterRixeArr[0]) " & StringLen($counterRixeArr[0]) & @CRLF)
+;~ 		ConsoleWrite("$counterRixeArr[0] " & $counterRixeArr[0] & @CRLF)
+;~ 		ConsoleWrite("=====$counterRixeRead " & $counterRixeRead & "=====" & @CRLF)
+;~ 		ConsoleWrite("$counterRixeReadCache " & $counterRixeReadCache & @CRLF)
+;~ 		ConsoleWrite("IsInt($counterRixeReadCache) " & IsInt($counterRixeReadCache) & @CRLF)
+;~ 		ConsoleWrite("-----------------------" & @CRLF)
 		If $rixeRetry = false AND IsInt($counterRixeReadCache) = true AND StringLen($counterRixeArr[0]) > 0 AND $counterRixeArr[0] <> " " AND StringInStr($counterRixe[1], "/") > 1 Then
 			$counterRixeRead = Int($counterRixeArr[0])
 ;~ 			ConsoleWrite("UBound:" & UBound($counterRixeArr, $UBOUND_ROWS) & @CRLF)
@@ -269,12 +303,39 @@ EndFunc
 ;~ 	ConsoleWrite("$maximumRixeTicket:" & $maximumRixeTicket & @CRLF)
 ;~ 	ConsoleWrite("$counterRixeRead:" & $counterRixeRead & @CRLF)
 	If $maximumRixeTicket = 10 And $counterRixeRead < 1 Then
-		ConsoleWrite("$ticketChargement:" & $ticketChargement & @CRLF)
+;~ 		ConsoleWrite("$ticketChargement:" & $ticketChargement & @CRLF)
 		If $ticketChargement = false Then
-			ConsoleWrite("Les tickets du Rixe se rechargent" & @CRLF)
+;~ 			ConsoleWrite("Les tickets du Rixe se rechargent" & @CRLF)
 			GUICtrlSetData($inputRixeCounter,$counterRixeRead & "/10")
 			GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Les tickets du Rixe se rechargent " & $counterRixeRead & "/10", $idListview)
 			$ticketChargement = true
+		EndIf
+		;~ 			Nous allons gemmer un peu :)
+;~ 		ConsoleWrite("$rixeGemmeLaunch:" & $rixeGemmeLaunch & @CRLF)
+		If $rixeGemmeLaunch < 20 Then
+			; On vérifie que le bouton "Lancer une partie" est là
+			_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\buttonRixeStart2.jpg", $hwnd, 790+$bluestackLeftBarWidth, 600+$bluestackTopBarHeight, 900+$bluestackLeftBarWidth, 626+$bluestackTopBarHeight)
+			$buttonRixeStart2 = _TessOcr(@WorkingDir & "\cache\buttonRixeStart2.jpg", @WorkingDir & "\cache\buttonRixeStart2")
+			If $buttonRixeStart2[1] = "Start Brawl" Or $buttonRixeStart2[1] = "Sta rt Brawl" Then
+				GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Le bouton est là et nous gemmons, on lance un rixe! " & $counterRixeRead & "/10", $idListview)
+				_GUICtrlListView_Scroll($idListview, 0, (_GUICtrlListView_GetItemCount($idListview) -1) * 14)
+				$positionHorizontaleAleatoire = _positionAleatoire(865, Random(1, 100, 1)) + $bluestackLeftBarWidth
+				$positionVerticaleAleatoire = _positionAleatoire(615, Random(1, 10, 1)) + $bluestackTopBarHeight
+				; On vérifie que le rixe est ouvert
+				If @HOUR <> "05" Then
+					If $mode_test = false Then
+						$currentWindow = WinGetHandle("")
+						WinActivate($hwnd)
+						$mousePos = MouseGetPos()
+						MouseClick($MOUSE_CLICK_LEFT, $positionHorizontaleAleatoire, $positionVerticaleAleatoire, 1, 0)
+						GUICtrlSetData($inputRixeCounter, $counterRixeRead -1 & "/10")
+						$counterRixeRead = $counterRixeRead - 1
+						ConsoleWrite("$MOUSE_CLICK_LEFT x:" & $positionHorizontaleAleatoire & " y:" & $positionVerticaleAleatoire & @CRLF)
+						MouseMove($mousePos[0],$mousePos[1],0)
+						WinActivate($currentWindow)
+					EndIf
+				EndIf
+			EndIf
 		EndIf
 ;~ 		ConsoleWrite("[" & $counter & "] Les tickets du Rixe se rechargent" & @CRLF)
 	Else
@@ -306,11 +367,14 @@ EndFunc
 			_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\buttonRixeExit.jpg", $hwnd, 953+$bluestackLeftBarWidth, 613+$bluestackTopBarHeight, 997+$bluestackLeftBarWidth, 634+$bluestackTopBarHeight)
 			$buttonRixeExit = _TessOcr(@WorkingDir & "\cache\buttonRixeExit.jpg", @WorkingDir & "\cache\buttonRixeExit")
 			If $buttonRixeExit[1] <> " " Then
-				ConsoleWrite("$buttonRixeExit:" & $buttonRixeExit[1] & @CRLF)
+;~ 				ConsoleWrite("$buttonRixeExit:" & $buttonRixeExit[1] & @CRLF)
 			EndIf
 			If $buttonRixeExit[1] = "Exit" Then
 				GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Le bouton pour quitter le rixe est là.", $idListview)
 ;~ 				ConsoleWrite($positionAleatoire & @CRLF)
+				_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\rixeScore.jpg", $hwnd, 1081+$bluestackLeftBarWidth, 525+$bluestackTopBarHeight, 1155+$bluestackLeftBarWidth, 560+$bluestackTopBarHeight)
+				$rixeScore = _TessOcr(@WorkingDir & "\cache\rixeScore.jpg", @WorkingDir & "\cache\rixeScore")
+				ConsoleWrite("$rixeScore: " & $rixeScore[1] & @CRLF)
 				If $mode_test = false Then
 					$currentWindow = WinGetHandle("")
 					WinActivate($hwnd)
