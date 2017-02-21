@@ -50,7 +50,7 @@ GUICtrlSetOnEvent($RunBtn, "RunnerFunc")
 $StopBtn = GUICtrlCreateButton("Arrêter", 10, 10, 80, 30)
 GUICtrlSetOnEvent($StopBtn, "StopFunc")
 
-$gemmeGame = GUICtrlCreateInput("0", 175, 15, 45, 20) ;delay de 2sec par defaut
+$gemmeGame = GUICtrlCreateInput("0", 175, 15, 20, 20) ;delay de 2sec par defaut
 $labelGemmeGame = GUICtrlCreateLabel("GemmeGame :", 100, 18, 150, 15)
 GUICtrlSetBkColor($labelGemmeGame, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($labelGemmeGame, $COLOR_WHITE)
@@ -62,19 +62,27 @@ $inputRixeCounter = GUICtrlCreateLabel("??/10", 460, 18, 40, 15)
 GUICtrlSetBkColor($inputRixeCounter, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($inputRixeCounter, $COLOR_WHITE)
 
+;~ Moyenne score rixe
+$labelRixeScoreMoy = GUICtrlCreateLabel("Moy :", 360, 18, 40, 15)
+GUICtrlSetBkColor($labelRixeScoreMoy, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($labelRixeScoreMoy, $COLOR_WHITE)
+$inputRixeScoreMoy = GUICtrlCreateLabel("0", 390, 18, 40, 15)
+GUICtrlSetBkColor($inputRixeScoreMoy, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($inputRixeScoreMoy, $COLOR_WHITE)
+
 ;~ Score total des rixes
-$labelRixeScore = GUICtrlCreateLabel("Score :", 340, 18, 40, 15)
+$labelRixeScore = GUICtrlCreateLabel("Score :", 285, 18, 40, 15)
 GUICtrlSetBkColor($labelRixeScore, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($labelRixeScore, $COLOR_WHITE)
-$inputRixeScore = GUICtrlCreateLabel("0", 380, 18, 40, 15)
+$inputRixeScore = GUICtrlCreateLabel("0", 320, 18, 40, 15)
 GUICtrlSetBkColor($inputRixeScore, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($inputRixeScore, $COLOR_WHITE)
 
 ;~ Total de party en rixe
-$labelRixeCount = GUICtrlCreateLabel("Rixe :", 270, 18, 40, 15)
+$labelRixeCount = GUICtrlCreateLabel("Rixe :", 230, 18, 40, 15)
 GUICtrlSetBkColor($labelRixeCount, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($labelRixeCount, $COLOR_WHITE)
-$inputRixeCount = GUICtrlCreateLabel("0", 300, 18, 40, 15)
+$inputRixeCount = GUICtrlCreateLabel("0", 260, 18, 40, 15)
 GUICtrlSetBkColor($inputRixeCount, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($inputRixeCount, $COLOR_WHITE)
 
@@ -89,6 +97,7 @@ Global $bluestackTopBarHeight = 32;
 Global $sleepTimeAleatoire = 0
 Global $rixeScoreTotal = 0
 Global $rixeTotal = 0
+Global $rixeScoreMoy = 0
 Global $ticketChargement = false
 Global $rixeGemmeLaunch = GUICtrlRead($gemmeGame)
 
@@ -402,8 +411,10 @@ EndFunc
 				$rixeScore = Int($rixeScore)
 				$rixeScoreTotal = $rixeScoreTotal + $rixeScore
 				$rixeTotal = $rixeTotal + 1
+				$rixeScoreMoy = Round($rixeScoreTotal / $rixeTotal)
 				GUICtrlSetData($inputRixeScore,$rixeScoreTotal)
 				GUICtrlSetData($inputRixeCount,$rixeTotal)
+				GUICtrlSetData($inputRixeScoreMoy,$rixeScoreMoy)
 				ConsoleWrite("$rixeScore: " & $rixeScore & @CRLF)
 				ConsoleWrite("$rixeScoreTotal: " & $rixeScoreTotal & @CRLF)
 				If $mode_test = false Then
