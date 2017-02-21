@@ -86,6 +86,14 @@ $inputRixeCount = GUICtrlCreateLabel("0", 260, 18, 40, 15)
 GUICtrlSetBkColor($inputRixeCount, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($inputRixeCount, $COLOR_WHITE)
 
+;~ Rank rixe
+$labelRixeRank = GUICtrlCreateLabel("Rank :", 430, 35, 40, 15)
+GUICtrlSetBkColor($labelRixeRank, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($labelRixeRank, $COLOR_WHITE)
+$inputRixeRank = GUICtrlCreateLabel("0", 470, 35, 40, 15)
+GUICtrlSetBkColor($inputRixeRank, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($inputRixeRank, $COLOR_WHITE)
+
 Global $disconnectMethod = 0
 Global $isDisconnected = false
 Global $rixeRetry = false
@@ -349,6 +357,7 @@ EndFunc
 				_GUICtrlListView_Scroll($idListview, 0, (_GUICtrlListView_GetItemCount($idListview) -1) * 14)
 				$positionHorizontaleAleatoire = _positionAleatoire(865, Random(1, 100, 1)) + $bluestackLeftBarWidth
 				$positionVerticaleAleatoire = _positionAleatoire(615, Random(1, 10, 1)) + $bluestackTopBarHeight
+
 				; On vérifie que le rixe est ouvert
 				If @HOUR <> "05" Then
 					If $mode_test = false Then
@@ -376,6 +385,13 @@ EndFunc
 			_GUICtrlListView_Scroll($idListview, 0, (_GUICtrlListView_GetItemCount($idListview) -1) * 14)
 			$positionHorizontaleAleatoire = _positionAleatoire(865, Random(1, 100, 1)) + $bluestackLeftBarWidth
 			$positionVerticaleAleatoire = _positionAleatoire(615, Random(1, 10, 1)) + $bluestackTopBarHeight
+;~ 				On vérifie notre classement
+			_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\rixeRank.jpg", $hwnd, 936+$bluestackLeftBarWidth, 230+$bluestackTopBarHeight, 1062+$bluestackLeftBarWidth, 276+$bluestackTopBarHeight)
+			$rixeRank = _TessOcr(@WorkingDir & "\cache\rixeRank.jpg", @WorkingDir & "\cache\rixeRank")
+			$rixeRank = $rixeRank[1]
+			$rixeRank = StringReplace($rixeRank, "2ank", "")
+			$rixeRank = StringReplace($rixeRank, "Rank", "")
+			GUICtrlSetData($inputRixeRank,$rixeRank)
 			; On vérifie que le rixe est ouvert
 			If @HOUR <> "05" Then
 				If $mode_test = false Then
