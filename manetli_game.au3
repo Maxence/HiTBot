@@ -25,7 +25,7 @@
 Global $hwnd = WinGetHandle("BlueStacks App Player")
 
 ; Declare the flags
-Global $mode_test = false
+Global $mode_test = true
 
 Global $Interrupt = 0
 $EventCheck = 0
@@ -62,6 +62,22 @@ $inputRixeCounter = GUICtrlCreateLabel("??/10", 460, 18, 40, 15)
 GUICtrlSetBkColor($inputRixeCounter, $GUI_BKCOLOR_TRANSPARENT )
 GUICtrlSetColor($inputRixeCounter, $COLOR_WHITE)
 
+;~ Score total des rixes
+$labelRixeScore = GUICtrlCreateLabel("Score :", 340, 18, 40, 15)
+GUICtrlSetBkColor($labelRixeScore, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($labelRixeScore, $COLOR_WHITE)
+$inputRixeScore = GUICtrlCreateLabel("0", 380, 18, 40, 15)
+GUICtrlSetBkColor($inputRixeScore, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($inputRixeScore, $COLOR_WHITE)
+
+;~ Total de party en rixe
+$labelRixeCount = GUICtrlCreateLabel("Rixe :", 270, 18, 40, 15)
+GUICtrlSetBkColor($labelRixeCount, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($labelRixeCount, $COLOR_WHITE)
+$inputRixeCount = GUICtrlCreateLabel("0", 300, 18, 40, 15)
+GUICtrlSetBkColor($inputRixeCount, $GUI_BKCOLOR_TRANSPARENT )
+GUICtrlSetColor($inputRixeCount, $COLOR_WHITE)
+
 Global $disconnectMethod = 0
 Global $isDisconnected = false
 Global $rixeRetry = false
@@ -71,6 +87,8 @@ Global $maximumRixeTicket = 0
 Global $bluestackLeftBarWidth = 59;
 Global $bluestackTopBarHeight = 32;
 Global $sleepTimeAleatoire = 0
+Global $rixeScoreTotal = 0
+Global $rixeTotal = 0
 Global $ticketChargement = false
 Global $rixeGemmeLaunch = GUICtrlRead($gemmeGame)
 
@@ -114,7 +132,7 @@ Func RunnerFunc()
   $Interrupt = 0
   ConsoleWrite("Not while RunnerFunc() $Interrupt " & $Interrupt & @CRLF)
   $EventCheck = 0
-  For $i = $Tc To $M
+;~   For $i = $Tc To $M
 	ConsoleWrite("RunnerFunc() $Interrupt " & $Interrupt & @CRLF)
 	If $sleepTimeAleatoire = 0 Then
 		$sleepTimeAleatoire = 500
@@ -133,14 +151,15 @@ Func RunnerFunc()
     If $Interrupt <> 0 Then
 	  $EventCheck = 0
       Return
+	Else
+		_startPlaying()
+;~ 		$Tc = $i+1
+		; Return to allow checking for system events
+		$EventCheck = 1
+		RunnerFunc()
+		Return
     EndIf
-	_startPlaying()
-    $Tc = $i+1
-    ; Return to allow checking for system events
-    $EventCheck = 1
-	RunnerFunc()
-    Return
-  Next
+;~   Next
   ConsoleWrite(">Waiting for next run" & @CRLF)
   ; Waiting loop here!
 EndFunc
@@ -372,9 +391,21 @@ EndFunc
 			If $buttonRixeExit[1] = "Exit" Then
 				GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Le bouton pour quitter le rixe est là.", $idListview)
 ;~ 				ConsoleWrite($positionAleatoire & @CRLF)
-				_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\rixeScore.jpg", $hwnd, 1081+$bluestackLeftBarWidth, 525+$bluestackTopBarHeight, 1155+$bluestackLeftBarWidth, 560+$bluestackTopBarHeight)
+				_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\rixeScore.jpg", $hwnd, 1091+$bluestackLeftBarWidth, 530+$bluestackTopBarHeight, 1155+$bluestackLeftBarWidth, 565+$bluestackTopBarHeight)
 				$rixeScore = _TessOcr(@WorkingDir & "\cache\rixeScore.jpg", @WorkingDir & "\cache\rixeScore")
-				ConsoleWrite("$rixeScore: " & $rixeScore[1] & @CRLF)
+				$rixeScore = $rixeScore[1]
+				$rixeScore = StringReplace($rixeScore, "x ", "")
+				$rixeScore = StringReplace($rixeScore, "x", "")
+				$rixeScore = StringReplace($rixeScore, "A ", "")
+				$rixeScore = StringReplace($rixeScore, "(*", "")
+				$rixeScore = StringReplace($rixeScore, ")", "")
+				$rixeScore = Int($rixeScore)
+				$rixeScoreTotal = $rixeScoreTotal + $rixeScore
+				$rixeTotal = $rixeTotal + 1
+				GUICtrlSetData($inputRixeScore,$rixeScoreTotal)
+				GUICtrlSetData($inputRixeCount,$rixeTotal)
+				ConsoleWrite("$rixeScore: " & $rixeScore & @CRLF)
+				ConsoleWrite("$rixeScoreTotal: " & $rixeScoreTotal & @CRLF)
 				If $mode_test = false Then
 					$currentWindow = WinGetHandle("")
 					WinActivate($hwnd)
