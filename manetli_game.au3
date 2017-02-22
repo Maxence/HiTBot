@@ -1,7 +1,7 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=hit.ico
 #AutoIt3Wrapper_UseX64=y
-#AutoIt3Wrapper_Res_Fileversion=1.0.0.10
+#AutoIt3Wrapper_Res_Fileversion=1.0.0.15
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=p
 #AutoIt3Wrapper_Res_Language=1036
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -111,7 +111,7 @@ Global $rixeGemmeLaunch = GUICtrlRead($gemmeGame)
 
 ;~ Global $idMylist = GUICtrlCreateList("", 10, 50, 480, 300)
 ;~ GUICtrlSetLimit(-1, 200) ; to limit horizontal scrolling
-Global $idListview = GUICtrlCreateListView("Heure|Nbr|Message", 10, 50, 480, 190) ;,$LVS_SORTDESCENDING)
+Global $idListview = GUICtrlCreateListView("Heure|Nbr|Message", 10, 50, 480, 190 ,$LVS_SORTDESCENDING)
 _GUICtrlListView_SetColumnWidth($idListview,0,55)
 _GUICtrlListView_SetColumnWidth($idListview,1,40)
 _GUICtrlListView_SetColumnWidth($idListview,2,381)
@@ -149,34 +149,29 @@ Func RunnerFunc()
   $Interrupt = 0
   ConsoleWrite("Not while RunnerFunc() $Interrupt " & $Interrupt & @CRLF)
   $EventCheck = 0
-;~   For $i = $Tc To $M
 	ConsoleWrite("RunnerFunc() $Interrupt " & $Interrupt & @CRLF)
 	If $sleepTimeAleatoire = 0 Then
 		$sleepTimeAleatoire = 500
 	Else
 		If $mode_test = false Then
-;~ 			$delay = GUICtrlRead($delayAction)
-;~ 			$delayRatio = $delay / 100000
-;~ 			$sleepTimeAleatoire = $delayAction + Random(1500*$delayRatio, 16000*$delayRatio, 1)
+	;~ 			$delay = GUICtrlRead($delayAction)
+	;~ 			$delayRatio = $delay / 100000
+	;~ 			$sleepTimeAleatoire = $delayAction + Random(1500*$delayRatio, 16000*$delayRatio, 1)
 			$sleepTimeAleatoire = Random(2000, 10000, 1)
 		Else
-			$sleepTimeAleatoire = 1000
+			$sleepTimeAleatoire = 100
 		EndIf
 	EndIf
 	sleep($sleepTimeAleatoire)
-    ; Check for Interruption
-    If $Interrupt <> 0 Then
+	; Check for Interruption
+	If $Interrupt <> 0 Then
 	  $EventCheck = 0
-      Return
+	  Return
 	Else
 		_startPlaying()
-;~ 		$Tc = $i+1
-		; Return to allow checking for system events
 		$EventCheck = 1
 		RunnerFunc()
-		Return
-    EndIf
-;~   Next
+	EndIf
   ConsoleWrite(">Waiting for next run" & @CRLF)
   ; Waiting loop here!
 EndFunc
@@ -314,7 +309,7 @@ EndFunc
 
 	; On déplace la fenetre pour garder toujours les même coordonées
 ;~ 	WinMove($hwnd, "", -1280, 176, 1235, 694 )
-	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\counterRixe.jpg", $hwnd, 800+$bluestackLeftBarWidth, 20+$bluestackTopBarHeight, 895+$bluestackLeftBarWidth, 42+$bluestackTopBarHeight)
+	_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\counterRixe.jpg", $hwnd, 800+$bluestackLeftBarWidth, 18+$bluestackTopBarHeight, 895+$bluestackLeftBarWidth, 42+$bluestackTopBarHeight)
 ;~ 	Puis on lit l'image avec Tesseract et on stock le string dans un fichier .txt
 	$counterRixe = _TessOcr(@WorkingDir & "\cache\counterRixe.jpg", @WorkingDir & "\cache\counterRixe")
 ;~ 	ConsoleWrite("$buttonRixeStart:" & $buttonRixeStart[1] & @CRLF)
@@ -389,8 +384,9 @@ EndFunc
 			_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\rixeRank.jpg", $hwnd, 936+$bluestackLeftBarWidth, 230+$bluestackTopBarHeight, 1062+$bluestackLeftBarWidth, 276+$bluestackTopBarHeight)
 			$rixeRank = _TessOcr(@WorkingDir & "\cache\rixeRank.jpg", @WorkingDir & "\cache\rixeRank")
 			$rixeRank = $rixeRank[1]
-			$rixeRank = StringReplace($rixeRank, "2ank", "")
-			$rixeRank = StringReplace($rixeRank, "Rank", "")
+;~ 			$rixeRank = StringReplace($rixeRank, "2ank", "")
+;~ 			$rixeRank = StringReplace($rixeRank, "Rank", "")
+			$rixeRank = StringRegExpReplace($rixeRank, "\D+", "")
 			GUICtrlSetData($inputRixeRank,$rixeRank)
 			; On vérifie que le rixe est ouvert
 			If @HOUR <> "05" Then
@@ -419,11 +415,16 @@ EndFunc
 				_ScreenCapture_CaptureWnd(@WorkingDir & "\cache\rixeScore.jpg", $hwnd, 1091+$bluestackLeftBarWidth, 530+$bluestackTopBarHeight, 1155+$bluestackLeftBarWidth, 565+$bluestackTopBarHeight)
 				$rixeScore = _TessOcr(@WorkingDir & "\cache\rixeScore.jpg", @WorkingDir & "\cache\rixeScore")
 				$rixeScore = $rixeScore[1]
-				$rixeScore = StringReplace($rixeScore, "x ", "")
-				$rixeScore = StringReplace($rixeScore, "x", "")
-				$rixeScore = StringReplace($rixeScore, "A ", "")
-				$rixeScore = StringReplace($rixeScore, "(*", "")
-				$rixeScore = StringReplace($rixeScore, ")", "")
+;~ 				$rixeScore = StringReplace($rixeScore, "x ", "")
+;~ 				$rixeScore = StringReplace($rixeScore, "x", "")
+;~ 				$rixeScore = StringReplace($rixeScore, "A ", "")
+;~ 				$rixeScore = StringReplace($rixeScore, "A", "")
+;~ 				$rixeScore = StringReplace($rixeScore, "k ", "")
+;~ 				$rixeScore = StringReplace($rixeScore, "k", "")
+;~ 				$rixeScore = StringReplace($rixeScore, "(*", "")
+;~ 				$rixeScore = StringReplace($rixeScore, ")", "")
+				$rixeScore = StringRegExpReplace($rixeScore, "\D+", "")
+				GUICtrlCreateListViewItem(_NowTime() & "|" & $counter & "|Score Rixe : " & $rixeScore, $idListview)
 				$rixeScore = Int($rixeScore)
 				$rixeScoreTotal = $rixeScoreTotal + $rixeScore
 				$rixeTotal = $rixeTotal + 1
