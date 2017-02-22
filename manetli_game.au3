@@ -27,7 +27,7 @@ Global $hwnd = WinGetHandle("BlueStacks App Player")
 ; Declare the flags
 Global $mode_test = true
 
-Global $Interrupt = 0
+Global $Interrupt = 1
 $EventCheck = 0
 
 ; Todays actions
@@ -125,63 +125,45 @@ GUIRegisterMsg($WM_COMMAND, "_WM_COMMAND")
 
 
 While 1
-  Sleep(10)
-  If $EventCheck = 1 Then
-    ; This temporary return to the main loop, allows AutoIt to quickly handle system events
-    ; such as GUI_EVENT_CLOSE. If we reached this far, then its safe to assume that
-    ; there was no system events, and we can return to the RunnerFunc.
-;~ 	$Interrupt = 0
-;~     RunnerFunc()
-  EndIf
-WEnd
+	If $Interrupt <> 0 Then
+		$EventCheck = 0
+	Else
+		$EventCheck = 1
+		_startPlaying()
+	EndIf
 
-Func RunnerFunc()
-  ; This check avoids GUI flicker
-  If $EventCheck = 0 Then
-    GUICtrlSetState($RunBtn, $GUI_HIDE)
-    GUICtrlSetState($StopBtn, $GUI_SHOW)
-  EndIf
-
-  $rixeGemmeLaunch = GUICtrlRead($gemmeGame)
-
-  $M = 3000000
-
-  $Interrupt = 0
-  ConsoleWrite("Not while RunnerFunc() $Interrupt " & $Interrupt & @CRLF)
-  $EventCheck = 0
-	ConsoleWrite("RunnerFunc() $Interrupt " & $Interrupt & @CRLF)
 	If $sleepTimeAleatoire = 0 Then
 		$sleepTimeAleatoire = 500
 	Else
 		If $mode_test = false Then
-	;~ 			$delay = GUICtrlRead($delayAction)
-	;~ 			$delayRatio = $delay / 100000
-	;~ 			$sleepTimeAleatoire = $delayAction + Random(1500*$delayRatio, 16000*$delayRatio, 1)
 			$sleepTimeAleatoire = Random(2000, 10000, 1)
 		Else
-			$sleepTimeAleatoire = 100
+			$sleepTimeAleatoire = 1000
 		EndIf
 	EndIf
 	sleep($sleepTimeAleatoire)
-	; Check for Interruption
-	If $Interrupt <> 0 Then
-	  $EventCheck = 0
-	  Return
-	Else
-		_startPlaying()
-		$EventCheck = 1
-		RunnerFunc()
+WEnd
+
+Func RunnerFunc()
+	; This check avoids GUI flicker
+	If $EventCheck = 0 Then
+		GUICtrlSetState($RunBtn, $GUI_HIDE)
+		GUICtrlSetState($StopBtn, $GUI_SHOW)
 	EndIf
-  ConsoleWrite(">Waiting for next run" & @CRLF)
-  ; Waiting loop here!
+
+	$rixeGemmeLaunch = GUICtrlRead($gemmeGame)
+
+	$Interrupt = 0
+	$EventCheck = 0
+	ConsoleWrite("RunnerFunc() $Interrupt " & $Interrupt & @CRLF)
 EndFunc
 
 Func StopFunc()
-  $Interrupt = 1
-  ConsoleWrite("StopFunc() $Interrupt " & $Interrupt & @CRLF)
-  GUICtrlSetState($StopBtn, $GUI_HIDE)
-  GUICtrlSetState($RunBtn, $GUI_SHOW)
-  ConsoleWrite(">Stopped" & @CRLF)
+	$Interrupt = 1
+	ConsoleWrite("StopFunc() $Interrupt " & $Interrupt & @CRLF)
+	GUICtrlSetState($StopBtn, $GUI_HIDE)
+	GUICtrlSetState($RunBtn, $GUI_SHOW)
+	ConsoleWrite(">Stopped" & @CRLF)
 EndFunc
 
 Func _WM_COMMAND($hWnd, $Msg, $wParam, $lParam)
