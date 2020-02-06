@@ -1,0 +1,2 @@
+date;rixe;score;score_moyen;skill1;skill2;skill3
+2017-02-23;329;24455;74;Continuous pierce;Hurricane arrow;Enchanced Rage Rampage
